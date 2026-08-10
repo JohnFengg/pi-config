@@ -1,6 +1,6 @@
 # pi-config
 
-我的个人 pi 定制仓库：扩展、主题、agent 配置，用 git 管理，可随时回滚。
+我的个人 pi 定制仓库：扩展、主题、agent 配置。
 
 ## 结构
 
@@ -20,7 +20,7 @@ install.sh     装机/恢复脚本
 # 1. 装官方 pi
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
-# 2. 拉本仓库(目前是 private,需要先有访问权限)
+# 2. 拉本仓库
 gh repo clone JohnFengg/pi-config ~/AI/pi-config   # 位置随意
 
 # 3. 一键安装:符号链接所有配置 + 注册本地 pi 包

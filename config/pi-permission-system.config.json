@@ -1,0 +1,13 @@
+{
+  "debugLog": false,
+  "permissionReviewLog": true,
+  "yoloMode": false,
+  "authorizerChain": ["session-preset"],
+  "permission": {
+    "*": "ask",
+    "read": "allow",
+    "find": "allow",
+    "grep": "allow",
+    "ls": "allow"
+  }
+}

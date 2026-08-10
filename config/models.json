@@ -1,0 +1,21 @@
+{
+    "providers":{
+        "deepseek":{
+            "modelOverrides":{
+                "deepseek-v4-flash":{
+                    "compat":{
+                        "sendSessionAffinityHeaders":true,
+                        "supportsLongCacheRetention":true    
+                    }
+                }
+            ,
+                "deepseek-v4-pro": {
+                    "compat": {
+                        "sendSessionAffinityHeaders": true,
+                        "supportsLongCacheRetention": true
+                    }
+                }
+            } 
+        }
+    }
+}

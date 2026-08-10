@@ -1,0 +1,53 @@
+{
+	"palette": "tokyo-night",
+	"density": "compact",
+	"separator": "none",
+	"segments": [
+		"model",
+		"thinking",
+		"cwd",
+		"branch",
+		"context",
+		"tokens"
+	],
+	"segmentText": {
+		"model": {
+			"prefix": "model:",
+			"suffix": ""
+		},
+		"thinking": {
+			"prefix": "",
+			"suffix": ""
+		},
+		"cwd": {
+			"prefix": "",
+			"suffix": ""
+		},
+		"branch": {
+			"prefix": "",
+			"suffix": ""
+		},
+		"context": {
+			"prefix": "",
+			"suffix": ""
+		},
+		"tokens": {
+			"prefix": "",
+			"suffix": ""
+		}
+	},
+	"extensionStatusIcons": {
+		"chrome-devtools": "🌐",
+		"codex-usage": "📊",
+		"usage": "📊",
+		"caffeinate": "💊",
+		"firecrawl": "🔥",
+		"github-pr": "🔎",
+		"goal": "🎯",
+		"lsp": "🧰",
+		"plan-mode": "📝",
+		"pisync": "🔄",
+		"subagents": "🧑‍🤝‍🧑",
+		"unknown-error-retry": "🔁"
+	}
+}

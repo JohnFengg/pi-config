@@ -1,0 +1,61 @@
+{
+  "lastChangelogVersion": "0.84.1",
+  "theme": "gruvbox-dark",
+  "images": {
+    "blockImages": false
+  },
+  "showHardwareCursor": true,
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "transport": "auto",
+  "showCacheMissNotices": true,
+  "defaultProjectTrust": "ask",
+  "warnings": {
+    "anthropicExtraUsage": true
+  },
+  "defaultProvider": "kimi-coding",
+  "defaultModel": "k3",
+  "defaultThinkingLevel": "max",
+  "packages": [
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:@tintinweb/pi-tasks",
+    "npm:pi-thinking-steps",
+    "npm:@narumitw/pi-btw",
+    "npm:@pi-extensions/pi-statusline",
+    "npm:@gotgenes/pi-permission-system",
+    "npm:pi-cache-optimizer"
+  ],
+  "outputPad": 1,
+  "subagents": {
+    "agentOverrides": {
+      "context-builder": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "worker": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "delegate": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "scout": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "reviewer": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "planner": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "researcher": {
+        "model": "deepseek/deepseek-v4-flash"
+      },
+      "oracle": {
+        "model": "deepseek/deepseek-v4-flash"
+      }
+    },
+    "defaultModel": "deepseek/deepseek-v4-flash"
+  }
+}

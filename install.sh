@@ -25,6 +25,7 @@ for f in settings.json keybindings.json mcp.json models.json statusline.json pi-
   link "$REPO_DIR/config/$f" "$AGENT_DIR/$f"
 done
 link "$REPO_DIR/config/pi-permission-system.config.json" "$AGENT_DIR/extensions/pi-permission-system/config.json"
+link "$REPO_DIR/config/subagent.config.json" "$AGENT_DIR/extensions/subagent/config.json"
 
 pi install "$REPO_DIR"
 

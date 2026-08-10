@@ -26,7 +26,8 @@
     "npm:@narumitw/pi-btw",
     "npm:@pi-extensions/pi-statusline",
     "npm:@gotgenes/pi-permission-system",
-    "npm:pi-cache-optimizer"
+    "npm:pi-cache-optimizer",
+    "../../AI/pi-config"
   ],
   "outputPad": 1,
   "subagents": {

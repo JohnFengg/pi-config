@@ -14,17 +14,24 @@ tests/         扩展的验证脚本(node 直接跑)
 install.sh     装机/恢复脚本
 ```
 
-## 新机器安装
+## 新用户安装（从零开始）
 
 ```bash
-gh repo clone JohnFengg/pi-config ~/AI/pi-config   # 或任意位置
-cd ~/AI/pi-config
-./install.sh        # 建符号链接 + pi install 本目录
+# 1. 装官方 pi
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+
+# 2. 拉本仓库(目前是 private,需要先有访问权限)
+gh repo clone JohnFengg/pi-config ~/AI/pi-config   # 位置随意
+
+# 3. 一键安装:符号链接所有配置 + 注册本地 pi 包
+cd ~/AI/pi-config && ./install.sh
+
+# 4. 首次启动 pi 会自动安装 settings.json 里列的全部 npm 包;
+#    然后 /login 配置你的模型凭证(凭证不随仓库分发)
+pi
 ```
 
-install.sh 会把已存在的同名文件备份为 `*.bak.<时间戳>` 再替换。
-
-也可以像普通 pi 包一样直接从 GitHub 安装(适合只想要扩展和主题、不要机器配置的场景):
+只想要扩展和主题、不要机器配置的话,也可以像普通 pi 包一样直接装:
 
 ```bash
 pi install git:github.com/JohnFengg/pi-config
@@ -54,4 +61,4 @@ git checkout <commit> -- .        # 或 git revert <commit>
 
 ## 不入库的东西
 
-`auth.json`(凭证)、`sessions/`、`*.log`、`trust.json`(本机项目信任列表)、npm 包本体(`settings.json` 的 `packages` 列表会在 `pi install` 时自动恢复)。扩展的运行时数据(如 `extensions/pi-permission-system/logs/`)同样不入库。
+`auth.json`(凭证)、`sessions/`、`*.log`、`trust.json`(本机项目信任列表)、npm 包本体(`settings.json` 的 `packages` 列表会在首次启动时自动安装恢复)。扩展的运行时数据(如 `extensions/pi-permission-system/logs/`)同样不入库。

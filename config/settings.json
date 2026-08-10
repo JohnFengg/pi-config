@@ -27,7 +27,8 @@
     "npm:@pi-extensions/pi-statusline",
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-cache-optimizer",
-    "../../AI/pi-config"
+    "../../AI/pi-config",
+    "npm:pi-intercom"
   ],
   "outputPad": 1,
   "subagents": {

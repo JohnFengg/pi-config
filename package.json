@@ -1,6 +1,6 @@
 {
   "name": "pi-config",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "My personal pi setup: extensions, theme, and agent config",
   "pi": {

@@ -13,7 +13,7 @@ const jiti = createJiti(import.meta.url, {
 
 const repoRoot = new URL("..", import.meta.url).pathname;
 const mod = await jiti.import(join(repoRoot, "extensions/effort.ts"));
-const { getAvailableLevels } = mod;
+const { getAvailableLevels, parseLevelArg } = mod;
 const extension = mod.default;
 
 // --- level filtering ---
@@ -43,7 +43,7 @@ assert.deepEqual(
 	["off", "low", "high", "max"],
 );
 
-// Grok-style: low/medium/high only, no max
+// Grok 4.5-style: low/medium/high only, no max
 assert.deepEqual(
 	getAvailableLevels({
 		reasoning: true,
@@ -55,6 +55,31 @@ assert.deepEqual(
 	}),
 	["off", "low", "medium", "high"],
 );
+
+// Grok 4.6: xhigh is opt-in via a non-null map entry; reasoning cannot be off
+assert.deepEqual(
+	getAvailableLevels({
+		reasoning: true,
+		thinkingLevelMap: {
+			off: null,
+			minimal: null,
+			low: "low",
+			medium: "medium",
+			high: "high",
+			xhigh: "xhigh",
+			max: null,
+		},
+	}),
+	["low", "medium", "high", "xhigh"],
+);
+
+assert.equal(parseLevelArg("xhigh"), "xhigh");
+assert.equal(parseLevelArg("extra high"), "xhigh");
+assert.equal(parseLevelArg("extra-high"), "xhigh");
+assert.equal(parseLevelArg("extra_high"), "xhigh");
+assert.equal(parseLevelArg("EXTRA"), "xhigh");
+assert.equal(parseLevelArg("xh"), "xhigh");
+assert.equal(parseLevelArg("nope"), undefined);
 
 // Explicit null on a base level hides it; undefined keeps it
 assert.deepEqual(
@@ -83,6 +108,12 @@ const completions = commands.get("effort").getArgumentCompletions("hi");
 assert.deepEqual(
 	completions.map((c) => c.value),
 	["high"],
+);
+
+const extraCompletions = commands.get("effort").getArgumentCompletions("extra");
+assert.deepEqual(
+	extraCompletions.map((c) => c.value),
+	["xhigh"],
 );
 
 // Direct set path
@@ -126,6 +157,41 @@ await commands2.get("effort").handler("max", {
 	},
 });
 assert.equal(setTo, "max");
+
+// Alias: extra high → xhigh on grok-4.6
+let grokSetTo;
+const commands3 = new Map();
+extension({
+	registerCommand(name, options) {
+		commands3.set(name, options);
+	},
+	getThinkingLevel() {
+		return "high";
+	},
+	setThinkingLevel(level) {
+		grokSetTo = level;
+	},
+});
+await commands3.get("effort").handler("extra high", {
+	mode: "tui",
+	model: {
+		id: "grok-4.6",
+		reasoning: true,
+		thinkingLevelMap: {
+			off: null,
+			minimal: null,
+			low: "low",
+			medium: "medium",
+			high: "high",
+			xhigh: "xhigh",
+			max: null,
+		},
+	},
+	ui: {
+		notify() {},
+	},
+});
+assert.equal(grokSetTo, "xhigh");
 
 // Reject unsupported level for model
 const warns = [];

@@ -28,6 +28,16 @@ const LEVEL_DESCRIPTIONS: Record<ThinkingLevel, string> = {
 	max: "Maximum reasoning",
 };
 
+/** Human / provider aliases → pi thinking levels. */
+const LEVEL_ALIASES: Record<string, ThinkingLevel> = {
+	xh: "xhigh",
+	extra: "xhigh",
+	"extra-high": "xhigh",
+	extra_high: "xhigh",
+	extrahigh: "xhigh",
+	"extra high": "xhigh",
+};
+
 type ModelLike = {
 	id?: string;
 	name?: string;
@@ -55,10 +65,11 @@ function modelLabel(model: ModelLike | undefined | null): string {
 	return model?.name || model?.id || "no model";
 }
 
-function parseLevelArg(args: string | undefined): ThinkingLevel | undefined {
-	const raw = args?.trim().toLowerCase();
+export function parseLevelArg(args: string | undefined): ThinkingLevel | undefined {
+	const raw = args?.trim().toLowerCase().replace(/\s+/g, " ");
 	if (!raw) return undefined;
-	return isThinkingLevel(raw) ? raw : undefined;
+	if (isThinkingLevel(raw)) return raw;
+	return LEVEL_ALIASES[raw];
 }
 
 function applyLevel(pi: ExtensionAPI, ctx: ExtensionContext, level: ThinkingLevel, available: ThinkingLevel[]) {
@@ -83,14 +94,23 @@ export default function effortExtension(pi: ExtensionAPI) {
 	pi.registerCommand("effort", {
 		description: "Select thinking/effort level for the current model (← →)",
 		getArgumentCompletions: (prefix: string): AutocompleteItem[] | null => {
-			const p = prefix.trim().toLowerCase();
-			const items = ALL_LEVELS
-				.filter((level) => !p || level.startsWith(p))
-				.map((level) => ({
+			const p = prefix.trim().toLowerCase().replace(/\s+/g, " ");
+			const seen = new Set<ThinkingLevel>();
+			const items: AutocompleteItem[] = [];
+			const add = (level: ThinkingLevel) => {
+				if (seen.has(level)) return;
+				seen.add(level);
+				items.push({
 					value: level,
 					label: level,
 					description: LEVEL_DESCRIPTIONS[level],
-				}));
+				});
+			};
+			for (const level of ALL_LEVELS) {
+				if (!p || level.startsWith(p)) add(level);
+			}
+			const aliased = parseLevelArg(p);
+			if (aliased) add(aliased);
 			return items.length > 0 ? items : null;
 		},
 		handler: async (args, ctx) => {

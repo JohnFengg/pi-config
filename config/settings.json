@@ -15,8 +15,8 @@
     "anthropicExtraUsage": true
   },
   "defaultProvider": "xai",
-  "defaultModel": "grok-4.5",
-  "defaultThinkingLevel": "high",
+  "defaultModel": "grok-4.6",
+  "defaultThinkingLevel": "xhigh",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-web-access",
@@ -28,7 +28,8 @@
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-cache-optimizer",
     "../../AI/pi-config",
-    "npm:pi-intercom"
+    "npm:pi-intercom",
+    "npm:@ayulab/pi-rewind"
   ],
   "outputPad": 1,
   "subagents": {

@@ -1,3 +1,3 @@
 # Terminal Output Readability
 
-When presenting mathematical expressions in terminal responses, do not use LaTeX as the only representation. Present each formula first in readable Unicode or plain text. For complex formulas where exact notation matters, follow the readable form with the original source in a fenced `latex` code block. Do not use `\[...\]`, `\(...\)`, `$...$`, or `$$...$$` as the sole presentation of a formula.
+The TUI renders `$...$`, `$$...$$`, `\(...\)`, `\[...\]`, and `latex`/`tex`/`math` fences as Unicode math. Wrap every TeX expression in one of those delimiters. Simple quantities may also be written directly in Unicode (for example, σ_H = q n_H μ_eff). Do not leave raw commands such as `\sigma`, `\,`, or `\mathrm` undelimited in prose, and do not put a formula in a fenced block as its only representation.

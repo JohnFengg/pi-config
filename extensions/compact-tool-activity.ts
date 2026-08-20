@@ -88,17 +88,17 @@ class HangingText {
 }
 
 class DiffGutterText {
-  constructor(private diffText: string) {}
+  constructor(private diffText: string, private theme: any) {}
   invalidate() {}
 
   private colorizeLine(line: string, rawLine: string): string {
     const foregroundAnsi = /\x1b\[(?:3[0-9]|9[0-7]|38;(?:2;\d+;\d+;\d+|5;\d+))m/g;
     const cleanLine = line.replace(foregroundAnsi, "");
     if (rawLine.startsWith("+")) {
-      return `\x1b[48;2;221;242;225m\x1b[38;2;35;92;47m${cleanLine}\x1b[39m\x1b[49m`;
+      return this.theme.fg("toolDiffAdded", cleanLine);
     }
     if (rawLine.startsWith("-")) {
-      return `\x1b[48;2;246;220;221m\x1b[38;2;138;48;52m${cleanLine}\x1b[39m\x1b[49m`;
+      return this.theme.fg("toolDiffRemoved", cleanLine);
     }
     return line;
   }
@@ -158,13 +158,16 @@ function saveSettings(settings: CompactSettings) {
   writeFileSync(SETTINGS_PATH, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
 }
 
-function decorateEditComponent(component: any) {
+function decorateEditComponent(component: any, theme: any) {
   if (!(component instanceof Box)) return;
   component.setBgFn((text: string) => {
-    const foreground = "\x1b[38;2;45;45;45m";
-    const background = "\x1b[48;2;226;226;226m";
-    const restoreForeground = text.replace(/\x1b\[39m/g, `\x1b[39m${foreground}`);
-    return `${background}${foreground}${restoreForeground}\x1b[39m\x1b[49m`;
+    const preview = component.preview;
+    if (preview) {
+      if ("error" in preview) return theme.bg("toolErrorBg", text);
+      return theme.bg("toolSuccessBg", text);
+    }
+    if (component.settledError) return theme.bg("toolErrorBg", text);
+    return theme.bg("toolPendingBg", text);
   });
 
   const preview = component.preview;
@@ -174,7 +177,7 @@ function decorateEditComponent(component: any) {
   if (lastChild instanceof DiffGutterText) return;
   if (lastChild instanceof Text) {
     component.removeChild(lastChild);
-    component.addChild(new DiffGutterText(preview.diff));
+    component.addChild(new DiffGutterText(preview.diff, theme));
   }
 }
 
@@ -429,7 +432,7 @@ export default function (pi: ExtensionAPI) {
         return compactCallLine("edit", args as Record<string, unknown>, theme, context, false);
       }
       const component = renderEditCall(args, theme, context);
-      decorateEditComponent(component);
+      decorateEditComponent(component, theme);
       return component;
     },
     renderResult(result, options, theme, context) {
@@ -437,7 +440,7 @@ export default function (pi: ExtensionAPI) {
       const expanded = isExpanded(context.toolCallId, options.expanded);
       if (!expanded) return new Container();
       const component = renderEditResult(result, { ...options, expanded: true }, theme, context);
-      decorateEditComponent(component);
+      decorateEditComponent(component, theme);
       return component;
     },
   });

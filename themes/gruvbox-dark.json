@@ -31,7 +31,7 @@
     "selectedBg": "bgSoft",
     "userMessageBg": "",
     "userMessageText": "#458588",
-    "customMessageBg": "#f8fbff",
+    "customMessageBg": "bgSoft",
     "customMessageText": "fg",
     "customMessageLabel": "purple",
     "toolPendingBg": "bgHard",

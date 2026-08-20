@@ -1,5 +1,5 @@
 {
-  "lastChangelogVersion": "0.84.1",
+  "lastChangelogVersion": "0.84.2",
   "theme": "gruvbox-dark",
   "images": {
     "blockImages": false
@@ -14,9 +14,9 @@
   "warnings": {
     "anthropicExtraUsage": true
   },
-  "defaultProvider": "xai",
-  "defaultModel": "grok-4.6",
-  "defaultThinkingLevel": "xhigh",
+  "defaultProvider": "deepseek",
+  "defaultModel": "deepseek-v4-flash",
+  "defaultThinkingLevel": "max",
   "packages": [
     "npm:pi-mcp-adapter",
     "npm:pi-web-access",
@@ -27,9 +27,9 @@
     "npm:@pi-extensions/pi-statusline",
     "npm:@gotgenes/pi-permission-system",
     "npm:pi-cache-optimizer",
-    "../../AI/pi-config",
     "npm:pi-intercom",
-    "npm:@ayulab/pi-rewind"
+    "npm:@ayulab/pi-rewind",
+    "npm:pi-goal-list-loop-audit"
   ],
   "outputPad": 1,
   "subagents": {

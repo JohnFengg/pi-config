@@ -2,3 +2,6 @@
 ._*
 node_modules/
 *.log
+
+# Offline bundles are built locally, not committed (95MB+)
+offline/pi-config-offline-*.tar.gz

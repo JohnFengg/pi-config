@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { ToolExecutionComponent } from "@earendil-works/pi-coding-agent";
-import { visibleWidth } from "@earendil-works/pi-tui";
+import { sliceByColumn, visibleWidth } from "@earendil-works/pi-tui";
 
 /**
  * tool-border: draw a box-drawing border around default tool execution output.
@@ -32,12 +32,6 @@ function borderChar(theme: ThemeLike, char: string): string {
   return theme.fg("dim", char);
 }
 
-function padLine(line: string, width: number): string {
-  const lineWidth = visibleWidth(line);
-  const padding = Math.max(0, width - lineWidth);
-  return line + " ".repeat(padding);
-}
-
 function makeTopBorder(theme: ThemeLike, width: number, toolName: string): string {
   const contentWidth = Math.max(0, width - 2);
   const title = ` ${toolName} `;
@@ -65,7 +59,11 @@ function addBorder(theme: ThemeLike, lines: string[], width: number, toolName: s
   if (lines.length === 0) return lines;
   const contentWidth = Math.max(0, width - 2);
   const top = makeTopBorder(theme, width, toolName);
-  const body = lines.map((line) => borderChar(theme, "│") + padLine(line, contentWidth) + borderChar(theme, "│"));
+  const body = lines.map((line) => {
+    const truncated = sliceByColumn(line, 0, contentWidth, true);
+    const padding = Math.max(0, contentWidth - visibleWidth(truncated));
+    return borderChar(theme, "│") + truncated + " ".repeat(padding) + borderChar(theme, "│");
+  });
   const bottom = makeBottomBorder(theme, width);
   return [top, ...body, bottom];
 }
@@ -81,7 +79,24 @@ export default function (pi: ExtensionAPI) {
 
     const originalRender = proto.render;
     proto.render = function (this: ToolExecutionComponentLike, width: number): string[] {
-      return originalRender.call(this, width);
+      if (this.hideComponent) return [];
+
+      // Self-rendered tools provide their own framing.
+      if (this.hasRendererDefinition && this.getRenderShell() === "self") {
+        return originalRender.call(this, width);
+      }
+
+      const lines = originalRender.call(this, width);
+      if (lines.length === 0) return lines;
+
+      // Drop the leading spacer that ToolExecutionComponent adds for vertical
+      // spacing; the border itself provides visual separation.
+      let bodyLines = lines;
+      if (bodyLines[0] === "") {
+        bodyLines = bodyLines.slice(1);
+      }
+
+      return addBorder(theme, bodyLines, width, this.toolName);
     };
   });
 }

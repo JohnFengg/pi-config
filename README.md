@@ -6,6 +6,9 @@
 
 ```
 extensions/    个人扩展(pi 包资源,自动加载)
+vendor/        第三方扩展的本地修补版(subtree 管理)
+               pi-thinking-steps: fork v1.0.11 + 修复 pi≥0.84.3 打包构建下
+               补丁失效的问题(改从包公共入口获取活类)
 themes/        gruvbox-dark 主题(pi 包资源)
 config/        非包资源,通过 install.sh 安装到 ~/.pi/agent/
                (settings.json 为复制,其余符号链接:keybindings.json / mcp.json /

@@ -22,7 +22,6 @@
     "npm:pi-web-access",
     "npm:pi-subagents",
     "npm:@tintinweb/pi-tasks",
-    "npm:pi-thinking-steps",
     "npm:@narumitw/pi-btw",
     "npm:@pi-extensions/pi-statusline",
     "npm:@gotgenes/pi-permission-system",

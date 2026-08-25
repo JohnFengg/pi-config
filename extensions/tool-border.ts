@@ -79,29 +79,9 @@ export default function (pi: ExtensionAPI) {
     if (proto[PATCHED]) return;
     proto[PATCHED] = true;
 
-    const originalRender = proto.render.bind(proto);
+    const originalRender = proto.render;
     proto.render = function (this: ToolExecutionComponentLike, width: number): string[] {
-      if (this.hideComponent) return [];
-
-      // Self-rendered tools provide their own framing.
-      if (this.hasRendererDefinition && this.getRenderShell() === "self") {
-        return originalRender.call(this, width);
-      }
-
-      // Render the inner content two columns narrower so the border fits
-      // within the requested width.
-      const innerWidth = Math.max(1, width - 2);
-      const lines = originalRender.call(this, innerWidth);
-      if (lines.length === 0) return lines;
-
-      // Drop the leading spacer that ToolExecutionComponent adds for vertical
-      // spacing; the border itself provides visual separation.
-      let bodyLines = lines;
-      if (bodyLines[0] === "") {
-        bodyLines = bodyLines.slice(1);
-      }
-
-      return addBorder(theme, bodyLines, width, this.toolName);
+      return originalRender.call(this, width);
     };
   });
 }

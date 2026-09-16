@@ -1,5 +1,4 @@
 import {
-  createBashToolDefinition,
   createEditToolDefinition,
   createFindToolDefinition,
   createGrepToolDefinition,
@@ -33,6 +32,11 @@ import { dirname, join } from "path";
  *
  * app.tools.expand is unbound in ~/.pi/agent/keybindings.json so this extension
  * owns ctrl+o / super+o without fighting the built-in global handler.
+ *
+ * Bash note: bash is owned by the vendored pi-bg-tasks extension (background
+ * execution). We do NOT register a bash override — pi rejects two extensions
+ * registering the same tool name. Instead our compact renderers are handed
+ * to pi-bg-tasks via a cooperative hook (see vendor/pi-bg-tasks/UPSTREAM.md).
  */
 
 type CompactSettings = {
@@ -416,7 +420,6 @@ export default function (pi: ExtensionAPI) {
 
   const cwd = process.cwd();
   pi.registerTool(compact("read", createReadToolDefinition(cwd)));
-  pi.registerTool(compact("bash", createBashToolDefinition(cwd)));
 
   // Edit: same one-line collapsed summary; expand reveals the rich diff box.
   const editDefinition = createEditToolDefinition(cwd);
@@ -449,6 +452,34 @@ export default function (pi: ExtensionAPI) {
   pi.registerTool(compact("grep", createGrepToolDefinition(cwd)));
   pi.registerTool(compact("find", createFindToolDefinition(cwd)));
   pi.registerTool(compact("ls", createLsToolDefinition(cwd)));
+
+  // Bash is owned by the vendored pi-bg-tasks extension (run_in_background,
+  // auto-backgrounding, completion notifications). pi's loader rejects two
+  // extensions registering "bash", so instead of overriding the tool we
+  // hand our compact renderers to pi-bg-tasks through this cooperative hook.
+  // It is consulted lazily at render time (order-independent); when the hook
+  // is absent, bash renders with pi's native default rendering.
+  const BG_RENDERERS = Symbol.for("pi-bg-tasks.renderers");
+  (globalThis as Record<symbol, unknown>)[BG_RENDERERS] = {
+    renderShell: "self" as const,
+    renderCall(args: Record<string, unknown>, theme: any, context: any) {
+      touchRow(context, "bash", args);
+      const expanded = isExpanded(context.toolCallId, !!context.expanded);
+      return compactCallLine("bash", args, theme, context, expanded);
+    },
+    renderResult(
+      result: { content?: Array<{ type: string; text?: string }> },
+      options: { expanded: boolean },
+      theme: any,
+      context: any,
+    ) {
+      const output = outputText(result);
+      touchRow(context, "bash", (context.args ?? {}) as Record<string, unknown>, output.length > 0);
+      const expanded = isExpanded(context.toolCallId, options.expanded);
+      if (!expanded) return new Container();
+      return output ? new HangingText("   ", theme.fg("toolOutput", output), "   ") : new Container();
+    },
+  };
 
   // --- Shortcuts (Mac: ctrl+o / cmd+o; no shift+letter — terminals often can't tell) ---
   const DOUBLE_TAP_MS = 400;

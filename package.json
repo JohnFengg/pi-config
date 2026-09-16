@@ -6,7 +6,8 @@
   "pi": {
     "extensions": [
       "./extensions",
-      "./vendor/pi-thinking-steps"
+      "./vendor/pi-thinking-steps",
+      "./vendor/pi-bg-tasks"
     ],
     "themes": [
       "./themes"

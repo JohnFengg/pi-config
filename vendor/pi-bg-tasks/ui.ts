@@ -48,30 +48,65 @@ export function clearBackgroundHint(ctx: UiContext): void {
 
 const STATUS_KEY = "bg-tasks";
 
+// LOCAL PATCH: the pill shows per-task elapsed time, so it needs a ticker to
+// stay live while tasks run (upstream renders counts only, no ticking).
+// Active solely while at least one backgrounded task is running; every
+// handle is unref'd.
+const PILL_TICK_MS = 5_000;
+let pillTimer: ReturnType<typeof setInterval> | undefined;
+let pillReg: BgRegistry | undefined;
+let pillCtx: UiContext | undefined;
+
+function stopPillTicker(): void {
+    if (pillTimer) {
+        clearInterval(pillTimer);
+        pillTimer = undefined;
+    }
+}
+
+function ensurePillTicker(reg: BgRegistry, ctx: UiContext): void {
+    pillReg = reg;
+    pillCtx = ctx;
+    if (pillTimer) return;
+    pillTimer = setInterval(() => {
+        if (pillReg && pillCtx) renderStatusPill(pillReg, pillCtx);
+    }, PILL_TICK_MS);
+    if (typeof pillTimer.unref === "function") pillTimer.unref();
+}
+
 /**
- * Render the aggregate status-bar text: running / completed / failed counts
- * shown as separate segments (`▶ 2 · ✓ 3 ✗ 1`), so finished tasks never
- * inflate the running count. Completed/failed come from the registry's
- * lifetime counters (bumped when a terminal job is evicted). Called after
- * any state change that affects the counts; no ticker — the pill is a
- * count, not a live duration.
+ * Render the aggregate status-bar text. LOCAL PATCH: one segment per running
+ * backgrounded task (`▶ 2m7s <brief cmd>`), plus lifetime ✓/✗ counts.
+ * Completed/failed come from the registry's lifetime counters (bumped when a
+ * terminal job is evicted). Called after any state change that affects the
+ * counts; the ticker keeps elapsed times fresh while tasks run.
  */
 export function renderStatusPill(reg: BgRegistry, ctx: UiContext): void {
-    let running = 0;
-    for (const job of reg.jobs.values()) {
-        if (!isTerminalStatus(job.status) && job.isBackgrounded) running++;
-    }
+    const runningJobs = [...reg.jobs.values()].filter(
+        (j) => !isTerminalStatus(j.status) && j.isBackgrounded,
+    );
     const done = reg.completedCount;
     const failed = reg.failedCount + reg.killedCount;
-    if (running === 0 && done === 0 && failed === 0) {
+    if (runningJobs.length === 0 && done === 0 && failed === 0) {
         ctx.ui.setStatus(STATUS_KEY, undefined);
+        stopPillTicker();
         return;
     }
+    const theme = ctx.ui.theme;
     const parts: string[] = [];
-    if (running > 0) parts.push(ctx.ui.theme.fg("accent", `▶ ${running}`));
-    if (done > 0) parts.push(ctx.ui.theme.fg("success", `✓ ${done}`));
-    if (failed > 0) parts.push(ctx.ui.theme.fg("error", `✗ ${failed}`));
-    ctx.ui.setStatus(STATUS_KEY, parts.join(ctx.ui.theme.fg("muted", " · ")));
+    for (const job of runningJobs.slice(0, 3)) {
+        const dur = formatDuration(Date.now() - job.startTime);
+        const cmd = truncateToWidth(job.command.replace(/\s+/g, " ").trim(), 36);
+        parts.push(theme.fg("accent", `▶ ${dur}`) + theme.fg("dim", ` ${cmd}`));
+    }
+    if (runningJobs.length > 3) {
+        parts.push(theme.fg("accent", `▶ +${runningJobs.length - 3} more`));
+    }
+    if (done > 0) parts.push(theme.fg("success", `✓ ${done}`));
+    if (failed > 0) parts.push(theme.fg("error", `✗ ${failed}`));
+    ctx.ui.setStatus(STATUS_KEY, parts.join(theme.fg("muted", " · ")));
+    if (runningJobs.length > 0) ensurePillTicker(reg, ctx);
+    else stopPillTicker();
 }
 
 // --- Foreground backgrounding ----------------------------------------------
